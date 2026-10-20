@@ -1,0 +1,178 @@
+<div class="entete">
+  <h1>Tickets</h1>
+  <div class="boutons">
+    <button mat-button type="button" (click)="exporterCsv()">
+      📥 Exporter CSV
+    </button>
+    <a mat-button routerLink="/tableau-de-bord">Tableau de bord</a>
+    <a mat-flat-button routerLink="/tickets/nouveau">Nouveau ticket</a>
+  </div>
+</div>
+
+<!-- ================= FILTRES ================= -->
+<div class="filtres">
+
+  <mat-form-field appearance="outline">
+    <mat-label>Titre</mat-label>
+    <input
+      matInput
+      [ngModel]="filtreTitre()"
+      (ngModelChange)="filtreTitre.set($event)"
+      [matAutocomplete]="autoFiltreTitre"
+    />
+    <mat-icon matSuffix>search</mat-icon>
+    <mat-autocomplete #autoFiltreTitre="matAutocomplete" autoActiveFirstOption>
+      @for (t of titresFiltres(); track t) {
+        <mat-option [value]="t">{{ t }}</mat-option>
+      }
+      @if (titresFiltres().length === 0) {
+        <mat-option disabled>Aucun titre correspondant</mat-option>
+      }
+    </mat-autocomplete>
+    <mat-hint>Ex : Imprimante en panne</mat-hint>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Demandeur</mat-label>
+    <input
+      matInput
+      [ngModel]="filtreDemandeur()"
+      (ngModelChange)="filtreDemandeur.set($event)"
+      [matAutocomplete]="autoFiltreDemandeur"
+    />
+    <mat-icon matSuffix>search</mat-icon>
+    <mat-autocomplete #autoFiltreDemandeur="matAutocomplete" autoActiveFirstOption>
+      @for (d of demandeursFiltres(); track d) {
+        <mat-option [value]="d">{{ d }}</mat-option>
+      }
+      @if (demandeursFiltres().length === 0) {
+        <mat-option disabled>Aucun demandeur correspondant</mat-option>
+      }
+    </mat-autocomplete>
+    <mat-hint>Ex : Awa</mat-hint>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Statut</mat-label>
+    <mat-select [ngModel]="filtreStatut()" (ngModelChange)="filtreStatut.set($event)">
+      <mat-option value="">Tous</mat-option>
+      @for (s of statuts; track s.valeur) {
+        <mat-option [value]="s.valeur">{{ s.libelle }}</mat-option>
+      }
+    </mat-select>
+    <mat-hint>Ex : En cours</mat-hint>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Priorité</mat-label>
+    <mat-select [ngModel]="filtrePriorite()" (ngModelChange)="filtrePriorite.set($event)">
+      <mat-option value="">Toutes</mat-option>
+      @for (p of priorites; track p.valeur) {
+        <mat-option [value]="p.valeur">{{ p.libelle }}</mat-option>
+      }
+    </mat-select>
+    <mat-hint>Ex : Haute</mat-hint>
+  </mat-form-field>
+
+  <button mat-button (click)="reinitialiser()">Réinitialiser</button>
+</div>
+
+<!-- ================= TABLEAU ================= -->
+<table mat-table [dataSource]="filtres()">
+
+  <ng-container matColumnDef="titre">
+    <th mat-header-cell *matHeaderCellDef
+        (click)="trierPar('titre')"
+        [class.actif]="estTriee('titre')">
+      Titre
+      <span class="fleche">
+        @if (estTriee('titre')) {
+          {{ triSens() === 'asc' ? '▲' : '▼' }}
+        } @else {
+          <span class="inactif">▲▼</span>
+        }
+      </span>
+    </th>
+    <td mat-cell *matCellDef="let t">{{ t.titre }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="priorite">
+    <th mat-header-cell *matHeaderCellDef
+        (click)="trierPar('priorite')"
+        [class.actif]="estTriee('priorite')">
+      Priorité
+      <span class="fleche">
+        @if (estTriee('priorite')) {
+          {{ triSens() === 'asc' ? '▲' : '▼' }}
+        } @else {
+          <span class="inactif">▲▼</span>
+        }
+      </span>
+    </th>
+    <td mat-cell *matCellDef="let t">
+      <span class="badge p-{{ t.priorite }}">{{ t.priorite }}</span>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="statut">
+    <th mat-header-cell *matHeaderCellDef
+        (click)="trierPar('statut')"
+        [class.actif]="estTriee('statut')">
+      Statut
+      <span class="fleche">
+        @if (estTriee('statut')) {
+          {{ triSens() === 'asc' ? '▲' : '▼' }}
+        } @else {
+          <span class="inactif">▲▼</span>
+        }
+      </span>
+    </th>
+    <td mat-cell *matCellDef="let t">
+      <span class="badge s-{{ t.statut }}">{{ t.statut }}</span>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="technicien">
+    <th mat-header-cell *matHeaderCellDef
+        (click)="trierPar('technicien')"
+        [class.actif]="estTriee('technicien')">
+      Technicien
+      <span class="fleche">
+        @if (estTriee('technicien')) {
+          {{ triSens() === 'asc' ? '▲' : '▼' }}
+        } @else {
+          <span class="inactif">▲▼</span>
+        }
+      </span>
+    </th>
+    <td mat-cell *matCellDef="let t">{{ t.technicien ?? 'Non affecté' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="echeance">
+    <th mat-header-cell *matHeaderCellDef
+        (click)="trierPar('echeance')"
+        [class.actif]="estTriee('echeance')">
+      Échéance
+      <span class="fleche">
+        @if (estTriee('echeance')) {
+          {{ triSens() === 'asc' ? '▲' : '▼' }}
+        } @else {
+          <span class="inactif">▲▼</span>
+        }
+      </span>
+    </th>
+    <td mat-cell *matCellDef="let t" [class.retard]="enRetard(t)">
+      {{ t.echeance | date: 'dd/MM/yyyy HH:mm' }}
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="colonnes"></tr>
+  <tr mat-row *matRowDef="let row; columns: colonnes"
+      class="ligne" [routerLink]="['/tickets', row.id]"></tr>
+</table>
+
+@if (ticketsVisibles().length === 0) {
+  <p class="vide">Aucun ticket pour le moment.</p>
+} @else if (filtres().length === 0) {
+  <p class="vide">Aucun ticket ne correspond aux filtres.</p>
+}

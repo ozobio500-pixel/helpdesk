@@ -1,0 +1,70 @@
+<a mat-button routerLink="/tickets">← Retour à la liste</a>
+
+@if (ticket(); as t) {
+
+  @if (peutModifier()) {
+    <div class="actions-haut">
+      <a mat-stroked-button [routerLink]="['/tickets', t.id, 'modifier']">
+        ✏️ Modifier
+      </a>
+    </div>
+  }
+
+  <div class="entete">
+    <h1>{{ t.titre }}</h1>
+    <span class="badge p-{{ t.priorite }}">{{ t.priorite }}</span>
+    <span class="badge s-{{ t.statut }}">{{ t.statut }}</span>
+  </div>
+
+  <p class="description">{{ t.description }}</p>
+
+  <div class="infos">
+    <div><strong>Demandeur :</strong> {{ t.demandeur }}</div>
+    <div><strong>Créé le :</strong> {{ t.dateCreation | date: 'dd/MM/yyyy HH:mm' }}</div>
+    <div [class.retard]="enRetard()">
+      <strong>Échéance :</strong> {{ t.echeance | date: 'dd/MM/yyyy HH:mm' }}
+      @if (enRetard()) { <span>(en retard)</span> }
+    </div>
+  </div>
+
+  @if (estAdmin()) {
+    <div class="actions">
+      <mat-form-field appearance="outline">
+        <mat-label>Technicien</mat-label>
+        <mat-select [ngModel]="t.technicien" (ngModelChange)="affecter($event)">
+          @for (tech of techniciens; track tech) {
+            <mat-option [value]="tech">{{ tech }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Statut</mat-label>
+        <mat-select [ngModel]="t.statut" (ngModelChange)="changerStatut($event)">
+          @for (s of statuts; track s.valeur) {
+            <mat-option [value]="s.valeur">{{ s.libelle }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="actions-bas">
+      <button mat-stroked-button color="warn" type="button" (click)="supprimer()">
+        Supprimer le ticket
+      </button>
+    </div>
+  }
+
+  <h2>Historique</h2>
+  <ul class="historique">
+    @for (h of t.historique; track $index) {
+      <li>
+        <span class="date">{{ h.date | date: 'dd/MM/yyyy HH:mm' }}</span>
+        <strong>{{ h.auteur }}</strong> : {{ h.action }}
+      </li>
+    }
+  </ul>
+
+} @else {
+  <p>Ticket introuvable ou accès refusé.</p>
+}

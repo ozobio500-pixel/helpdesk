@@ -1,0 +1,135 @@
+<h1>{{ estEdition() ? 'Modifier le ticket' : 'Nouveau ticket' }}</h1>
+
+<form [formGroup]="form" (ngSubmit)="envoyer()" class="formulaire">
+
+  <!-- ================= TITRE ================= -->
+  <mat-form-field appearance="outline">
+    <mat-label>Titre</mat-label>
+    <input
+      matInput
+      formControlName="titre"
+      [matAutocomplete]="autoTitre"
+      #titreInput
+      #autoTitreTrigger="matAutocompleteTrigger"
+    />
+    <button
+      mat-icon-button
+      matSuffix
+      type="button"
+      title="Ouvrir la liste"
+      (mousedown)="$event.preventDefault()"
+      (click)="ouvrirTitre()">
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      matSuffix
+      type="button"
+      title="Ajouter ce titre à la liste"
+      (click)="ajouterTitre(form.controls.titre.value)">
+      <mat-icon>add</mat-icon>
+    </button>
+
+    <mat-autocomplete #autoTitre="matAutocomplete" autoActiveFirstOption>
+      @for (t of titresFiltres(); track t) {
+        <mat-option [value]="t">{{ t }}</mat-option>
+      }
+      @if (titresFiltres().length === 0) {
+        <mat-option disabled>Aucun titre — clique sur + pour l’ajouter</mat-option>
+      }
+    </mat-autocomplete>
+
+    <mat-hint>Choisis dans la liste ou écris ton propre titre</mat-hint>
+    @if (form.controls.titre.hasError('required')) {
+      <mat-error>Le titre est obligatoire</mat-error>
+    } @else if (form.controls.titre.hasError('minlength')) {
+      <mat-error>Au moins 3 caractères</mat-error>
+    }
+  </mat-form-field>
+
+  <!-- ================= DESCRIPTION ================= -->
+  <mat-form-field appearance="outline">
+    <mat-label>Description</mat-label>
+    <mat-select formControlName="description">
+      @for (d of descriptions; track d) {
+        <mat-option [value]="d">{{ d }}</mat-option>
+      }
+    </mat-select>
+    <mat-hint>Ex : Plus de connexion au réseau</mat-hint>
+    <mat-error>La description est obligatoire</mat-error>
+  </mat-form-field>
+
+  <!-- ================= PRIORITÉ ================= -->
+  <mat-form-field appearance="outline">
+    <mat-label>Priorité</mat-label>
+    <mat-select formControlName="priorite">
+      @for (p of priorites; track p.valeur) {
+        <mat-option [value]="p.valeur">{{ p.libelle }}</mat-option>
+      }
+    </mat-select>
+    <mat-hint>Ex : Haute (24 h)</mat-hint>
+  </mat-form-field>
+
+  <!-- ================= DEMANDEUR ================= -->
+  <mat-form-field appearance="outline">
+    <mat-label>Demandeur</mat-label>
+    <input
+      matInput
+      formControlName="demandeur"
+      [matAutocomplete]="autoDemandeur"
+      #demandeurInput
+      #autoDemandeurTrigger="matAutocompleteTrigger"
+    />
+    <button
+      mat-icon-button
+      matSuffix
+      type="button"
+      title="Ouvrir la liste"
+      (mousedown)="$event.preventDefault()"
+      (click)="ouvrirDemandeur()">
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      matSuffix
+      type="button"
+      title="Ajouter ce demandeur à la liste"
+      (click)="ajouterDemandeur(form.controls.demandeur.value)">
+      <mat-icon>add</mat-icon>
+    </button>
+
+    <mat-autocomplete #autoDemandeur="matAutocomplete" autoActiveFirstOption>
+      @for (d of demandeursFiltres(); track d) {
+        <mat-option [value]="d">{{ d }}</mat-option>
+      }
+      @if (demandeursFiltres().length === 0) {
+        <mat-option disabled>Aucun demandeur — clique sur + pour l’ajouter</mat-option>
+      }
+    </mat-autocomplete>
+
+    @if (estEdition()) {
+      <mat-hint>Le demandeur ne peut pas être modifié</mat-hint>
+    } @else {
+      <mat-hint>Choisis dans la liste ou écris un nom</mat-hint>
+    }
+    @if (form.controls.demandeur.hasError('required')) {
+      <mat-error>Le nom du demandeur est obligatoire</mat-error>
+    } @else if (form.controls.demandeur.hasError('minlength')) {
+      <mat-error>Au moins 2 caractères</mat-error>
+    }
+  </mat-form-field>
+
+  <!-- ================= BOUTONS ================= -->
+  <div class="actions">
+    @if (!estEdition()) {
+      <button mat-button type="button" (click)="reinitialiserListes()">
+        Réinitialiser les listes
+      </button>
+    }
+    <a mat-button routerLink="/tickets">Annuler</a>
+    <button mat-flat-button type="submit">
+      {{ estEdition() ? 'Enregistrer' : 'Créer le ticket' }}
+    </button>
+  </div>
+
+</form>

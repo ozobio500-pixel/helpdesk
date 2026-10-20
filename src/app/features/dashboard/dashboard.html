@@ -1,0 +1,132 @@
+<div class="entete">
+  <h1>Tableau de bord</h1>
+  <div class="boutons">
+    <a mat-button routerLink="/tickets">Voir les tickets</a>
+    <a mat-flat-button routerLink="/tickets/nouveau">Nouveau ticket</a>
+  </div>
+</div>
+
+<!-- ================= CARTES STATUT ================= -->
+<div class="cartes">
+
+  <mat-card class="carte carte-total">
+    <mat-card-content>
+      <div class="valeur">{{ total() }}</div>
+      <div class="libelle">Total</div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="carte carte-ouvert">
+    <mat-card-content>
+      <div class="valeur">{{ nbOuverts() }}</div>
+      <div class="libelle">Ouverts</div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="carte carte-encours">
+    <mat-card-content>
+      <div class="valeur">{{ nbEnCours() }}</div>
+      <div class="libelle">En cours</div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="carte carte-resolu">
+    <mat-card-content>
+      <div class="valeur">{{ nbResolus() }}</div>
+      <div class="libelle">Résolus</div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="carte carte-clos">
+    <mat-card-content>
+      <div class="valeur">{{ nbClos() }}</div>
+      <div class="libelle">Clos</div>
+    </mat-card-content>
+  </mat-card>
+
+</div>
+
+<!-- ================= RÉPARTITION PRIORITÉ ================= -->
+<h2>Répartition par priorité</h2>
+
+<div class="barres">
+
+  <div class="barre-ligne">
+    <span class="etiquette">Critique</span>
+    <div class="barre">
+      <div class="remplissage p-critique" [style.width.%]="pourcentage(nbCritiques())"></div>
+    </div>
+    <span class="compteur">{{ nbCritiques() }}</span>
+  </div>
+
+  <div class="barre-ligne">
+    <span class="etiquette">Haute</span>
+    <div class="barre">
+      <div class="remplissage p-haute" [style.width.%]="pourcentage(nbHautes())"></div>
+    </div>
+    <span class="compteur">{{ nbHautes() }}</span>
+  </div>
+
+  <div class="barre-ligne">
+    <span class="etiquette">Moyenne</span>
+    <div class="barre">
+      <div class="remplissage p-moyenne" [style.width.%]="pourcentage(nbMoyennes())"></div>
+    </div>
+    <span class="compteur">{{ nbMoyennes() }}</span>
+  </div>
+
+  <div class="barre-ligne">
+    <span class="etiquette">Basse</span>
+    <div class="barre">
+      <div class="remplissage p-basse" [style.width.%]="pourcentage(nbBasses())"></div>
+    </div>
+    <span class="compteur">{{ nbBasses() }}</span>
+  </div>
+
+</div>
+
+<!-- ================= TICKETS EN RETARD ================= -->
+<h2>
+  Tickets en retard
+  @if (ticketsEnRetard().length > 0) {
+    <span class="pastille">{{ ticketsEnRetard().length }}</span>
+  }
+</h2>
+
+@if (ticketsEnRetard().length === 0) {
+  <p class="vide">Aucun ticket en retard. 👌</p>
+} @else {
+  <ul class="liste-alerte">
+    @for (t of ticketsEnRetard(); track t.id) {
+      <li [routerLink]="['/tickets', t.id]">
+        <span class="badge p-{{ t.priorite }}">{{ t.priorite }}</span>
+        <strong>{{ t.titre }}</strong>
+        <span class="meta">
+          {{ t.demandeur }} — échéance {{ t.echeance | date: 'dd/MM HH:mm' }}
+        </span>
+      </li>
+    }
+  </ul>
+}
+
+<!-- ================= TICKETS NON AFFECTÉS ================= -->
+<h2>
+  Tickets non affectés
+  @if (ticketsNonAffectes().length > 0) {
+    <span class="pastille">{{ ticketsNonAffectes().length }}</span>
+  }
+</h2>
+
+@if (ticketsNonAffectes().length === 0) {
+  <p class="vide">Tous les tickets sont affectés. ✅</p>
+} @else {
+  <ul class="liste-alerte">
+    @for (t of ticketsNonAffectes(); track t.id) {
+      <li [routerLink]="['/tickets', t.id]">
+        <span class="badge s-{{ t.statut }}">{{ t.statut }}</span>
+        <strong>{{ t.titre }}</strong>
+        <span class="meta">{{ t.demandeur }}</span>
+      </li>
+    }
+  </ul>
+}
